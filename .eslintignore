@@ -1,0 +1,5 @@
+coverage/*
+/docs/**
+!.eslintrc.js
+/dist/*
+myDataBase.json
