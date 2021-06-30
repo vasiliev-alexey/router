@@ -1,6 +1,5 @@
 import { HistoryRouter } from './HistoryRouter';
 import { Route } from './types';
-import { resolve } from 'eslint-import-resolver-typescript';
 
 describe('Router must be class', () => {
   it('constructor test', () => {
@@ -12,6 +11,7 @@ describe('Router must be class', () => {
     const router = new HistoryRouter();
 
     const firstRoute: Route = {
+      callback: jest.fn(),
       onEnter: jest.fn(),
       path: '0',
     };
@@ -23,16 +23,24 @@ describe('Router must be class', () => {
     const router = new HistoryRouter();
     const rnd = `/(${Math.random().toString(10)}`;
 
+    const callBackFunc = jest.fn();
     const firstRoute: Route = {
+      callback: callBackFunc,
       onEnter: jest.fn(),
       path: rnd,
     };
 
-    history.pushState({}, rnd, rnd);
+    const dummyState = {
+      a: Math.random() * 100500,
+    };
+
     router.registerRoute(firstRoute);
     expect(firstRoute.onEnter).not.toHaveBeenCalled();
-    router.navigate();
-    expect(firstRoute.onEnter).toHaveBeenCalled();
+    expect(callBackFunc).not.toHaveBeenCalled();
+
+    router.navigate(rnd, dummyState);
+    expect(firstRoute.onEnter).toHaveBeenCalledWith(rnd, dummyState);
+    expect(callBackFunc).toHaveBeenCalled();
   });
 
   it('expect router have method to navigate with function', () => {
@@ -42,36 +50,39 @@ describe('Router must be class', () => {
     const secondPathFunc = jest.fn().mockReturnValue(true);
 
     const firstRoute: Route = {
+      callback: jest.fn(),
       onEnter: jest.fn(),
       path: routeFunc,
     };
     const secondRoute: Route = {
+      callback: jest.fn(),
       onEnter: jest.fn(),
       path: secondPathFunc,
     };
 
-    router.registerRoute(firstRoute);
+    const firstRouteFunc = router.registerRoute(firstRoute);
     router.registerRoute(secondRoute);
     expect(firstRoute.onEnter).not.toHaveBeenCalled();
     expect(secondRoute.onEnter).not.toHaveBeenCalled();
-    router.navigate();
+    router.navigate('', {});
     expect(firstRoute.onEnter).toHaveBeenCalled();
-    router.navigate();
+    firstRouteFunc();
+    router.navigate('', {});
     expect(secondRoute.onEnter).toHaveBeenCalled();
   });
 
   it('expect router have method to navigate with Regex', () => {
     const router = new HistoryRouter();
     const routeFunc = /^\/\d\d\d$/;
-    const rnd = (Math.random() * 1000 + 100).toFixed(0).substr(0, 3);
     const firstRoute: Route = {
+      callback: jest.fn(),
       onEnter: jest.fn(),
       path: routeFunc,
     };
     router.registerRoute(firstRoute);
-    history.pushState({}, 'rnd', '/' + rnd);
+
     expect(firstRoute.onEnter).not.toHaveBeenCalled();
-    router.navigate();
+    router.navigate('/123', {});
     expect(firstRoute.onEnter).toHaveBeenCalled();
   });
 
@@ -82,22 +93,16 @@ describe('Router must be class', () => {
     const routeFunc = /^\/\d\d\d$/;
     const rnd = (Math.random() * 1000 + 100).toFixed(0).substr(0, 3);
     const firstRoute: Route = {
+      callback: jest.fn(),
       path: routeFunc,
       onEnter: new Promise((resolve, reject) => {
-        console.log('Готово.');
-        // Успех в половине случаев.
-
         resolve(t);
       }),
-      //  onEnter: jest.fn().mockImplementationOnce(() => Promise.resolve())
     };
     router.registerRoute(firstRoute);
     history.pushState({}, 'rnd', '/' + rnd);
 
-    await router.navigate();
-
+    await router.navigate('/111', {});
     expect(t).toHaveBeenCalled();
-    //   await sleep(100);
-    // expect(firstRoute.onEnter).toHaveBeenCalled();
   });
 });

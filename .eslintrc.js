@@ -4,15 +4,11 @@ module.exports = {
     es2021: true,
     jest: true,
   },
-  // extends: ['airbnb-base'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  // extends: [
-  //   'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
-  // ],
   plugins: ['@typescript-eslint'],
   rules: {
     'no-unused-vars': 'off',

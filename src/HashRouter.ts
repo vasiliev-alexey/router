@@ -7,7 +7,7 @@ const log: Logger = new Logger({
   minLevel: DEBUG_LEVEL,
 });
 
-export class HistoryRouter extends Router {
+export class HashRouter extends Router {
   routeStore(routeParam: Record<string, unknown>, url: string): void {
     log.debug('add data to history state');
     history.pushState(routeParam, url, url);
