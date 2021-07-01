@@ -1,10 +1,17 @@
 export type RouteKey = Function | RegExp | string;
+export type DataType = Record<string, unknown>;
+
+export type HookFunctionType = (
+  url: string,
+  data: DataType
+) => Promise<void> | void;
+
 export type Route = {
   path: RouteKey;
-  callback: Function;
-  onEnter?: Function | Promise<Function> | undefined;
-  onBeforeEnter?: Function | Promise<Function> | undefined;
-  onLeave?: Function | Promise<Function> | undefined;
+  callback: (data: DataType) => void;
+  onEnter?: HookFunctionType;
+  onBeforeEnter?: HookFunctionType;
+  onLeave?: HookFunctionType;
 };
 
 export type RouterType = 'Hash' | 'History';

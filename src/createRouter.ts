@@ -1,11 +1,10 @@
-import { Router } from './Router';
-import { HistoryRouter } from './HistoryRouter';
+import { HashRouter, HistoryRouter, Router } from './Router';
 import { RouterType } from './types';
 
-export function createRouter(routerType: RouterType): Router | undefined {
+export function createRouter(routerType: RouterType): Router {
   if (routerType == 'Hash') {
     return new HistoryRouter();
   } else {
-    return undefined;
+    return new HashRouter();
   }
 }

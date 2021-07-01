@@ -1,4 +1,4 @@
-import { Route, RouteKey } from './types';
+import { DataType, HookFunctionType, Route, RouteKey } from './types';
 import { Logger } from 'tslog';
 import { DEBUG_LEVEL } from './constant';
 
@@ -7,20 +7,26 @@ const log: Logger = new Logger({
   minLevel: DEBUG_LEVEL,
 });
 
+const hashLogger: Logger = new Logger({
+  name: 'HashRouter',
+  minLevel: DEBUG_LEVEL,
+});
+const historyLogger: Logger = new Logger({
+  name: 'HistoryRouter',
+  minLevel: DEBUG_LEVEL,
+});
+
 export abstract class Router {
-  // конфигурация роутов должна поддерживаться через функции/строки/регулярки
   private routeTable: Set<Route> = new Set<Route>();
-  private currentPath: string = '';
 
   public registerRoute(p: Route) {
-    // регистрируем роут в таблице
     this.routeTable.add(p);
 
     return () => {
-      // функция по отписке
       return this.routeTable.delete(p);
     };
   }
+
   private findRoute(pathname: string) {
     log.debug('pathname', pathname, this.routeTable);
 
@@ -30,68 +36,79 @@ export abstract class Router {
       log.debug('pathname', pathname);
       if (typeof route.path === 'function') {
         matched = route.path(pathname);
-
-        log.debug('match func', matched);
+        log.debug('Route matched by function', matched);
       } else if (route.path instanceof RegExp) {
         matched = route.path.test(pathname);
-        log.debug('5555555555555555', matched);
+        log.debug('Route matched by RegExp', matched);
       } else if (typeof route.path === 'string') {
-        log.debug('4444444444444444', matched);
+        log.debug('Route matched by string', matched);
         matched = route.path === pathname;
       } else {
-        log.debug('1111111111111111111111', matched);
+        log.warn('route has unknown  RouteKey');
       }
       if (!matched) {
-        return;
+        continue;
       } else {
         return route;
       }
     }
   }
 
-  abstract routeStore(routeParam: Record<string, unknown>, url: string): void;
+  abstract routeStore(routeParam: DataType, url: string): void;
 
-  async navigate(
-    url: string,
-    routeParam: Record<string, unknown>
-  ): Promise<void> {
-    this.routeStore(routeParam, url);
-
+  async navigate(url: string, routeParam: DataType): Promise<void> {
     const route = this.findRoute(url);
 
     if (!route) {
-      log.warn('np route found');
+      log.warn('No route found');
       return;
     }
 
-    if (this.currentPath !== '' && url !== this.currentPath) {
+    const prevPath = location.pathname;
+    this.routeStore(routeParam, url);
+
+    if (prevPath !== '' && url !== prevPath) {
       log.info('call onLeave');
-
-      if (route.onLeave instanceof Promise) {
-        log.debug('onLeave called');
-      }
+      await this.callHook('onLeave', route.onLeave, prevPath, routeParam);
     }
 
-    if (route.onEnter instanceof Promise) {
-      log.debug('pppppppppppppppppppppp');
-      // route.onEnter.then( ()=> {
-      //     log.debug("sss")
-      // })
+    log.debug('call before hooks');
+    await this.callHook('onBeforeEnter', route.onBeforeEnter, url, routeParam);
+    await this.callHook('onEnter', route.onEnter, url, routeParam);
 
-      const asyncFunc = await route.onEnter;
-      asyncFunc(url, routeParam);
-      log.debug('wwwwwwwwwwww');
-    } else {
-      log.debug('qqqqqqqqqqqqqqq');
-      route.onEnter && route.onEnter(url, routeParam);
-    }
-
+    log.debug('call callback');
     route.callback(routeParam);
   }
 
-  // должна поддерживаться передача параметров в хуки роутера
+  private async callHook(
+    hookName: string,
+    hook: HookFunctionType | undefined,
+    url: string,
+    routeParam: DataType
+  ): Promise<void> {
+    if (!hook) {
+      return;
+    }
 
-  // реализовать поддержку асинхронных onBeforeEnter, onEnter, onLeave
+    if (hook instanceof Promise) {
+      log.debug(hookName, ' called');
+      await hook(url, routeParam);
+    } else {
+      hook(url, routeParam);
+    }
+  }
+}
 
-  // добавить настройку для работы с hash/history api
+export class HashRouter extends Router {
+  routeStore(routeParam: DataType, url: string): void {
+    hashLogger.debug('set browser url with normalize');
+    location.href = location.href.replace(/#(.*)$/, '') + '#' + url;
+  }
+}
+
+export class HistoryRouter extends Router {
+  routeStore(routeParam: Record<string, unknown>, url: string): void {
+    historyLogger.debug('add data to history state');
+    history.pushState(routeParam, url, url);
+  }
 }
