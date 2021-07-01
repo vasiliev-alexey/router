@@ -2,11 +2,12 @@
   "name": "otus_router",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "private": true,
-  "homepage": "https://vasiliev-alexey.github.io/",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "homepage": "https://github.com/vasiliev-alexey/router",
   "scripts": {
     "test": "jest --coverage",
+    "build": "tsc -b",
     "lint": "prettier --check . && eslint ./src --ext .js,.ts && tsc --noEmit",
     "lint:fix": "prettier --write . && eslint . --fix --ext .js,.ts && tsc --noEmit",
     "prepare": "husky install"
