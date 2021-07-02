@@ -3,8 +3,8 @@ import { RouterType } from './types';
 
 export function createRouter(routerType: RouterType): Router {
   if (routerType == 'Hash') {
-    return new HistoryRouter();
-  } else {
     return new HashRouter();
+  } else {
+    return new HistoryRouter();
   }
 }
