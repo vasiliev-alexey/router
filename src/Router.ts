@@ -1,4 +1,4 @@
-import { DataType, HookFunctionType, Route, RouteKey } from './types';
+import { DataType, HookFunctionType, Route } from './types';
 import { Logger } from 'tslog';
 import { DEBUG_LEVEL } from './constant';
 
@@ -89,13 +89,8 @@ export abstract class Router {
     if (!hook) {
       return;
     }
-
-    if (hook instanceof Promise) {
-      log.debug(hookName, ' called');
-      await hook(url, routeParam);
-    } else {
-      hook(url, routeParam);
-    }
+    log.debug(hookName, ' called');
+    await hook(url, routeParam);
   }
 }
 
