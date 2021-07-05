@@ -1,0 +1,49 @@
+{
+  "name": "otus_router",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "homepage": "https://github.com/vasiliev-alexey/router",
+  "scripts": {
+    "test": "jest --coverage",
+    "build": "tsc -b",
+    "lint": "prettier --check . && eslint ./src --ext .js,.ts && tsc --noEmit",
+    "lint:fix": "prettier --write . && eslint . --fix --ext .js,.ts && tsc --noEmit",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "vasiliev-alexey",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.13.13",
+    "@babel/eslint-parser": "^7.14.3",
+    "@babel/plugin-transform-runtime": "^7.13.15",
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^26.0.23",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.6.3",
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "eslint-plugin-import": "^2.23.2",
+    "eslint-plugin-jest": "^24.3.6",
+    "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
+    "jest": "^26.6.3",
+    "lint-staged": "^11.0.0",
+    "prettier": "2.3.0",
+    "ts-jest": "^26.5.4",
+    "typescript": "^4.2.4"
+  },
+  "lint-staged": {
+    "*.ts": "eslint --cache --fix",
+    "*.{js,ts,md}": "prettier --write"
+  },
+  "dependencies": {
+    "tslog": "^3.2.0"
+  }
+}
